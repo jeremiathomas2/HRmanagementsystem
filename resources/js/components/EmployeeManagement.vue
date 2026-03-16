@@ -1,0 +1,941 @@
+<template>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <h1 class="text-xl font-semibold text-gray-900">Employee Management</h1>
+            <span class="ml-3 px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800">
+              {{ employees.length }} Total
+            </span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button @click="showBulkActions = !showBulkActions" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center">
+              <CheckIcon class="w-5 h-5 mr-2" />
+              Bulk Actions
+            </button>
+            <button @click="importEmployees" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+              <ArrowDownTrayIcon class="w-5 h-5 mr-2" />
+              Import
+            </button>
+            <button @click="exportEmployees" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+              <DocumentArrowDownIcon class="w-5 h-5 mr-2" />
+              Export
+            </button>
+            <button @click="showAddModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center">
+              <PlusIcon class="w-5 h-5 mr-2" />
+              Add Employee
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Advanced Filters -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-900">Advanced Filters</h3>
+          <button @click="resetFilters" class="text-sm text-gray-500 hover:text-gray-700">Reset All</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <input v-model="filters.search" @input="searchEmployees" type="text" placeholder="Search by name, ID, email..." 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <select v-model="filters.department_id" @change="loadEmployees" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900">
+              <option value="">All Departments</option>
+              <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Employment Category</label>
+            <select v-model="filters.employment_category" @change="loadEmployees" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900">
+              <option value="">All Categories</option>
+              <option value="permanent">Permanent</option>
+              <option value="contract">Contract</option>
+              <option value="probation">Probation</option>
+              <option value="casual">Casual</option>
+              <option value="intern">Intern</option>
+              <option value="consultant">Consultant</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Region</label>
+            <select v-model="filters.region" @change="loadEmployees" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900">
+              <option value="">All Regions</option>
+              <option value="Dar es Salaam">Dar es Salaam</option>
+              <option value="Arusha">Arusha</option>
+              <option value="Mwanza">Mwanza</option>
+              <option value="Dodoma">Dodoma</option>
+              <option value="Other">Other Regions</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Work Permit Status</label>
+            <select v-model="filters.work_permit_status" @change="loadEmployees" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900">
+              <option value="">All Status</option>
+              <option value="valid">Valid</option>
+              <option value="expiring">Expiring Soon</option>
+              <option value="expired">Expired</option>
+              <option value="not_required">Not Required</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-2 bg-blue-100 rounded-lg">
+              <UserGroupIcon class="w-6 h-6 text-blue-600" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Total Employees</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.total_employees }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <CheckCircleIcon class="w-6 h-6 text-green-600" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Active</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.active_employees }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-2 bg-yellow-100 rounded-lg">
+              <ExclamationTriangleIcon class="w-6 h-6 text-yellow-600" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Work Permits Expiring</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.expiring_work_permits }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-2 bg-purple-100 rounded-lg">
+              <CalendarIcon class="w-6 h-6 text-purple-600" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">On Probation</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.on_probation }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Table -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left">
+                  <input type="checkbox" @change="toggleSelectAll" 
+                         :checked="selectedEmployees.length === employees.length && employees.length > 0"
+                         class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Permit</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hire Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="employee in employees" :key="employee.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <input type="checkbox" v-model="selectedEmployees" :value="employee.id"
+                         class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                        <span class="text-white font-medium">{{ employee.first_name?.charAt(0) }}{{ employee.last_name?.charAt(0) }}</span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ employee.full_name }}</div>
+                      <div class="text-sm text-gray-500">{{ employee.employee_number }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ employee.email }}</div>
+                  <div class="text-sm text-gray-500">{{ employee.phone }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ employee.department?.name || 'N/A' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ employee.job_title }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span :class="getCategoryBadgeClass(employee.employment_category)" 
+                        class="px-2 py-1 text-xs font-medium rounded-full">
+                    {{ employee.employment_category }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ employee.region || 'N/A' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span v-if="employee.work_permit_required" 
+                        :class="getWorkPermitBadgeClass(employee.work_permit_status)"
+                        class="px-2 py-1 text-xs font-medium rounded-full">
+                    {{ employee.work_permit_status }}
+                  </span>
+                  <span v-else class="text-sm text-gray-500">Not Required</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatDate(employee.hire_date) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span :class="employee.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                        class="px-2 py-1 text-xs font-medium rounded-full">
+                    {{ employee.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                  <span v-if="employee.is_on_probation" class="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                    Probation
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex space-x-2">
+                    <button @click="viewEmployee(employee)" class="text-indigo-600 hover:text-indigo-900" title="View">
+                      <EyeIcon class="w-5 h-5" />
+                    </button>
+                    <button @click="editEmployee(employee)" class="text-blue-600 hover:text-blue-900" title="Edit">
+                      <PencilIcon class="w-5 h-5" />
+                    </button>
+                    <button @click="viewDocuments(employee)" class="text-green-600 hover:text-green-900" title="Documents">
+                      <DocumentIcon class="w-5 h-5" />
+                    </button>
+                    <button @click="viewHistory(employee)" class="text-purple-600 hover:text-purple-900" title="History">
+                      <ClockIcon class="w-5 h-5" />
+                    </button>
+                    <button @click="deleteEmployee(employee)" class="text-red-600 hover:text-red-900" title="Delete">
+                      <TrashIcon class="w-5 h-5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button @click="previousPage" :disabled="pagination.current_page === 1" 
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Previous
+            </button>
+            <button @click="nextPage" :disabled="pagination.current_page === pagination.last_page" 
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Next
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ pagination.from }}</span>
+                to
+                <span class="font-medium">{{ pagination.to }}</span>
+                of
+                <span class="font-medium">{{ pagination.total }}</span>
+                results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button @click="previousPage" :disabled="pagination.current_page === 1"
+                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <ChevronLeftIcon class="h-5 w-5" />
+                </button>
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                  Page {{ pagination.current_page }} of {{ pagination.last_page }}
+                </span>
+                <button @click="nextPage" :disabled="pagination.current_page === pagination.last_page"
+                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <ChevronRightIcon class="h-5 w-5" />
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Employee Modal -->
+    <div v-if="showAddModal || showEditModal" class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeModals"></div>
+        
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+              {{ showAddModal ? 'Add New Employee' : 'Edit Employee' }}
+            </h3>
+            
+            <form @submit.prevent="saveEmployee" class="space-y-6">
+              <!-- Personal Information -->
+              <div class="border-b border-gray-200 pb-6">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Personal Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">First Name *</label>
+                    <input v-model="employeeForm.first_name" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Middle Name</label>
+                    <input v-model="employeeForm.middle_name" type="text" 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Last Name *</label>
+                    <input v-model="employeeForm.last_name" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Email *</label>
+                    <input v-model="employeeForm.email" type="email" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Phone *</label>
+                    <input v-model="employeeForm.phone" type="tel" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Date of Birth *</label>
+                    <input v-model="employeeForm.date_of_birth" type="date" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Gender *</label>
+                    <select v-model="employeeForm.gender" required 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Marital Status *</label>
+                    <select v-model="employeeForm.marital_status" required 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                      <option value="">Select Status</option>
+                      <option value="single">Single</option>
+                      <option value="married">Married</option>
+                      <option value="divorced">Divorced</option>
+                      <option value="widowed">Widowed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">National ID *</label>
+                    <input v-model="employeeForm.national_id" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Employment Information -->
+              <div class="border-b border-gray-200 pb-6">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Employment Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Employment Category *</label>
+                    <select v-model="employeeForm.employment_category" required 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                      <option value="">Select Category</option>
+                      <option value="permanent">Permanent</option>
+                      <option value="probation">Probation</option>
+                      <option value="contract">Contract</option>
+                      <option value="casual">Casual</option>
+                      <option value="intern">Intern</option>
+                      <option value="consultant">Consultant</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Hire Date *</label>
+                    <input v-model="employeeForm.hire_date" type="date" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Job Title *</label>
+                    <input v-model="employeeForm.job_title" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Department</label>
+                    <select v-model="employeeForm.department_id" 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                      <option value="">Select Department</option>
+                      <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Basic Salary *</label>
+                    <input v-model="employeeForm.basic_salary" type="number" step="0.01" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Employment Type *</label>
+                    <input v-model="employeeForm.employment_type" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Information -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-4">Contact Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Address *</label>
+                    <textarea v-model="employeeForm.address" required rows="2"
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">City *</label>
+                    <input v-model="employeeForm.city" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Region *</label>
+                    <input v-model="employeeForm.region" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Postal Code *</label>
+                    <input v-model="employeeForm.postal_code" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Emergency Contact -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-4">Emergency Contact</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Contact Name *</label>
+                    <input v-model="employeeForm.emergency_contact_name" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Contact Phone *</label>
+                    <input v-model="employeeForm.emergency_contact_phone" type="tel" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Relationship *</label>
+                    <input v-model="employeeForm.emergency_contact_relationship" type="text" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button @click="saveEmployee" type="button" 
+                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+              {{ showAddModal ? 'Add Employee' : 'Update Employee' }}
+            </button>
+            <button @click="closeModals" type="button" 
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted, computed } from 'vue'
+import { 
+  PlusIcon, 
+  DocumentArrowDownIcon,
+  EyeIcon, 
+  PencilIcon, 
+  TrashIcon,
+  CheckIcon,
+  ArrowDownTrayIcon,
+  UserGroupIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  CalendarIcon,
+  DocumentIcon,
+  ClockIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
+} from '@heroicons/vue/24/outline'
+
+export default {
+  name: 'EmployeeManagement',
+  components: {
+    PlusIcon,
+    DocumentArrowDownIcon,
+    EyeIcon,
+    PencilIcon,
+    TrashIcon,
+    CheckIcon,
+    ArrowDownTrayIcon,
+    UserGroupIcon,
+    CheckCircleIcon,
+    ExclamationTriangleIcon,
+    CalendarIcon,
+    DocumentIcon,
+    ClockIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon
+  },
+  setup() {
+    const employees = ref([])
+    const departments = ref([])
+    const showAddModal = ref(false)
+    const showEditModal = ref(false)
+    const showBulkActions = ref(false)
+    const employeeForm = ref({})
+    const selectedEmployees = ref([])
+    const filters = ref({
+      search: '',
+      department_id: '',
+      employment_category: '',
+      region: '',
+      work_permit_status: ''
+    })
+    const pagination = ref({
+      current_page: 1,
+      last_page: 1,
+      from: 0,
+      to: 0,
+      total: 0
+    })
+
+    // Tanzania-specific statistics
+    const stats = ref({
+      total_employees: 342,
+      active_employees: 328,
+      expiring_work_permits: 5,
+      on_probation: 22
+    })
+
+    // Tanzania-specific employee data
+    const loadEmployees = async () => {
+      try {
+        // Mock Tanzania-specific data for demonstration
+        const mockEmployees = [
+          {
+            id: 1,
+            employee_number: 'TZ-HR-001',
+            first_name: 'Amina',
+            last_name: 'Mwangi',
+            full_name: 'Amina Mwangi',
+            email: 'amina.mwangi@company.co.tz',
+            phone: '+255 754 123 456',
+            job_title: 'HR Manager',
+            department: { id: 1, name: 'Human Resources' },
+            employment_category: 'permanent',
+            region: 'Dar es Salaam',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2020-01-15',
+            is_active: true,
+            is_on_probation: false,
+            basic_salary: 2500000
+          },
+          {
+            id: 2,
+            employee_number: 'TZ-HR-002',
+            first_name: 'Joseph',
+            last_name: 'Mgaya',
+            full_name: 'Joseph Mgaya',
+            email: 'joseph.mgaya@company.co.tz',
+            phone: '+255 754 234 567',
+            job_title: 'Operations Supervisor',
+            department: { id: 2, name: 'Operations' },
+            employment_category: 'permanent',
+            region: 'Arusha',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2019-06-20',
+            is_active: true,
+            is_on_probation: false,
+            basic_salary: 1800000
+          },
+          {
+            id: 3,
+            employee_number: 'TZ-HR-003',
+            first_name: 'Grace',
+            last_name: 'Kimario',
+            full_name: 'Grace Kimario',
+            email: 'grace.kimario@company.co.tz',
+            phone: '+255 754 345 678',
+            job_title: 'Finance Officer',
+            department: { id: 3, name: 'Finance' },
+            employment_category: 'contract',
+            region: 'Mwanza',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2021-03-10',
+            is_active: true,
+            is_on_probation: false,
+            basic_salary: 1500000
+          },
+          {
+            id: 4,
+            employee_number: 'TZ-HR-004',
+            first_name: 'Peter',
+            last_name: 'Massawe',
+            full_name: 'Peter Massawe',
+            email: 'peter.massawe@company.co.tz',
+            phone: '+255 754 456 789',
+            job_title: 'Sales Executive',
+            department: { id: 4, name: 'Sales & Marketing' },
+            employment_category: 'probation',
+            region: 'Dodoma',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2023-11-01',
+            is_active: true,
+            is_on_probation: true,
+            basic_salary: 800000
+          },
+          {
+            id: 5,
+            employee_number: 'TZ-HR-005',
+            first_name: 'Sarah',
+            last_name: 'Kiwanga',
+            full_name: 'Sarah Kiwanga',
+            email: 'sarah.kiwanga@company.co.tz',
+            phone: '+255 754 567 890',
+            job_title: 'IT Support Specialist',
+            department: { id: 5, name: 'IT' },
+            employment_category: 'permanent',
+            region: 'Dar es Salaam',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2020-08-15',
+            is_active: true,
+            is_on_probation: false,
+            basic_salary: 1200000
+          },
+          {
+            id: 6,
+            employee_number: 'TZ-HR-006',
+            first_name: 'John',
+            last_name: 'Mwanga',
+            full_name: 'John Mwanga',
+            email: 'john.mwanga@company.co.tz',
+            phone: '+255 754 678 901',
+            job_title: 'Logistics Coordinator',
+            department: { id: 6, name: 'Logistics' },
+            employment_category: 'casual',
+            region: 'Dar es Salaam',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2023-09-01',
+            is_active: true,
+            is_on_probation: false,
+            basic_salary: 600000
+          },
+          {
+            id: 7,
+            employee_number: 'TZ-HR-007',
+            first_name: 'Mary',
+            last_name: 'Kisilu',
+            full_name: 'Mary Kisilu',
+            email: 'mary.kisilu@company.co.tz',
+            phone: '+255 754 789 012',
+            job_title: 'Accountant',
+            department: { id: 3, name: 'Finance' },
+            employment_category: 'permanent',
+            region: 'Arusha',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2019-12-10',
+            is_active: true,
+            is_on_probation: false,
+            basic_salary: 1600000
+          },
+          {
+            id: 8,
+            employee_number: 'TZ-HR-008',
+            first_name: 'David',
+            last_name: 'Moshi',
+            full_name: 'David Moshi',
+            email: 'david.moshi@company.co.tz',
+            phone: '+255 754 890 123',
+            job_title: 'Marketing Manager',
+            department: { id: 4, name: 'Sales & Marketing' },
+            employment_category: 'permanent',
+            region: 'Mwanza',
+            work_permit_required: false,
+            work_permit_status: 'not_required',
+            hire_date: '2020-05-20',
+            is_active: true,
+            is_on_probation: false,
+            basic_salary: 2000000
+          }
+        ]
+
+        // Apply filters
+        let filteredEmployees = mockEmployees.filter(emp => {
+          if (filters.value.search && !emp.full_name.toLowerCase().includes(filters.value.search.toLowerCase()) &&
+              !emp.employee_number.toLowerCase().includes(filters.value.search.toLowerCase()) &&
+              !emp.email.toLowerCase().includes(filters.value.search.toLowerCase())) {
+            return false
+          }
+          if (filters.value.department_id && emp.department?.id != filters.value.department_id) {
+            return false
+          }
+          if (filters.value.employment_category && emp.employment_category !== filters.value.employment_category) {
+            return false
+          }
+          if (filters.value.region && emp.region !== filters.value.region) {
+            return false
+          }
+          if (filters.value.work_permit_status && emp.work_permit_status !== filters.value.work_permit_status) {
+            return false
+          }
+          return true
+        })
+
+        // Pagination
+        const perPage = 10
+        const startIndex = (pagination.value.current_page - 1) * perPage
+        const endIndex = startIndex + perPage
+        
+        employees.value = filteredEmployees.slice(startIndex, endIndex)
+        pagination.value = {
+          current_page: pagination.value.current_page,
+          last_page: Math.ceil(filteredEmployees.length / perPage),
+          from: startIndex + 1,
+          to: Math.min(endIndex, filteredEmployees.length),
+          total: filteredEmployees.length
+        }
+
+        // Update statistics
+        stats.value = {
+          total_employees: mockEmployees.length,
+          active_employees: mockEmployees.filter(emp => emp.is_active).length,
+          expiring_work_permits: mockEmployees.filter(emp => emp.work_permit_status === 'expiring').length,
+          on_probation: mockEmployees.filter(emp => emp.is_on_probation).length
+        }
+
+      } catch (error) {
+        console.error('Error loading employees:', error)
+      }
+    }
+
+    const loadDepartments = async () => {
+      try {
+        // Mock Tanzania-specific departments
+        departments.value = [
+          { id: 1, name: 'Human Resources' },
+          { id: 2, name: 'Operations' },
+          { id: 3, name: 'Finance' },
+          { id: 4, name: 'Sales & Marketing' },
+          { id: 5, name: 'IT' },
+          { id: 6, name: 'Logistics' }
+        ]
+      } catch (error) {
+        console.error('Error loading departments:', error)
+      }
+    }
+
+    const searchEmployees = () => {
+      pagination.value.current_page = 1
+      loadEmployees()
+    }
+
+    const resetFilters = () => {
+      filters.value = {
+        search: '',
+        department_id: '',
+        employment_category: '',
+        region: '',
+        work_permit_status: ''
+      }
+      pagination.value.current_page = 1
+      loadEmployees()
+    }
+
+    const getCategoryBadgeClass = (category) => {
+      const classes = {
+        permanent: 'bg-blue-100 text-blue-800',
+        contract: 'bg-green-100 text-green-800',
+        probation: 'bg-yellow-100 text-yellow-800',
+        casual: 'bg-gray-100 text-gray-800',
+        intern: 'bg-purple-100 text-purple-800',
+        consultant: 'bg-indigo-100 text-indigo-800'
+      }
+      return classes[category] || 'bg-gray-100 text-gray-800'
+    }
+
+    const getWorkPermitBadgeClass = (status) => {
+      const classes = {
+        valid: 'bg-green-100 text-green-800',
+        expiring: 'bg-yellow-100 text-yellow-800',
+        expired: 'bg-red-100 text-red-800',
+        not_required: 'bg-gray-100 text-gray-800'
+      }
+      return classes[status] || 'bg-gray-100 text-gray-800'
+    }
+
+    const formatDate = (dateString) => {
+      return new Date(dateString).toLocaleDateString('en-TZ', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    }
+
+    const toggleSelectAll = () => {
+      if (selectedEmployees.value.length === employees.value.length) {
+        selectedEmployees.value = []
+      } else {
+        selectedEmployees.value = employees.value.map(emp => emp.id)
+      }
+    }
+
+    const clearSelection = () => {
+      selectedEmployees.value = []
+    }
+
+    const bulkExport = () => {
+      console.log('Bulk exporting selected employees:', selectedEmployees.value)
+    }
+
+    const bulkTerminate = () => {
+      console.log('Bulk terminating selected employees:', selectedEmployees.value)
+    }
+
+    const importEmployees = () => {
+      console.log('Import employees functionality')
+    }
+
+    const exportEmployees = () => {
+      console.log('Export all employees')
+    }
+
+    const viewEmployee = (employee) => {
+      console.log('View employee:', employee)
+    }
+
+    const editEmployee = (employee) => {
+      console.log('Edit employee:', employee)
+    }
+
+    const viewDocuments = (employee) => {
+      console.log('View documents for:', employee)
+    }
+
+    const viewHistory = (employee) => {
+      console.log('View history for:', employee)
+    }
+
+    const deleteEmployee = (employee) => {
+      console.log('Delete employee:', employee)
+    }
+
+    const saveEmployee = async () => {
+      try {
+        console.log('Saving employee:', employeeForm.value)
+        // Close modals and reload
+        showAddModal.value = false
+        showEditModal.value = false
+        loadEmployees()
+      } catch (error) {
+        console.error('Error saving employee:', error)
+      }
+    }
+
+    const previousPage = () => {
+      if (pagination.value.current_page > 1) {
+        pagination.value.current_page--
+        loadEmployees()
+      }
+    }
+
+    const nextPage = () => {
+      if (pagination.value.current_page < pagination.value.last_page) {
+        pagination.value.current_page++
+        loadEmployees()
+      }
+    }
+
+    onMounted(() => {
+      loadEmployees()
+      loadDepartments()
+    })
+
+    return {
+      employees,
+      departments,
+      showAddModal,
+      showEditModal,
+      showBulkActions,
+      employeeForm,
+      selectedEmployees,
+      filters,
+      pagination,
+      stats,
+      loadEmployees,
+      loadDepartments,
+      searchEmployees,
+      resetFilters,
+      getCategoryBadgeClass,
+      getWorkPermitBadgeClass,
+      formatDate,
+      toggleSelectAll,
+      clearSelection,
+      bulkExport,
+      bulkTerminate,
+      importEmployees,
+      exportEmployees,
+      viewEmployee,
+      editEmployee,
+      viewDocuments,
+      viewHistory,
+      deleteEmployee,
+      saveEmployee,
+      previousPage,
+      nextPage
+    }
+  }
+}
+</script>
