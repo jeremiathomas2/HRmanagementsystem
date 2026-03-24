@@ -16,6 +16,7 @@ import LeaveManagement from './components/LeaveManagement.vue'
 import RecruitmentManagement from './components/RecruitmentManagement.vue'
 import PerformanceManagement from './components/PerformanceManagement.vue'
 import TrainingManagement from './components/TrainingManagement.vue'
+import SystemManagement from './components/SystemManagement.vue'
 
 // Import submenu components
 import DashboardAnalytics from './components/dashboard/Analytics.vue'
@@ -74,6 +75,7 @@ const routes = [
   { path: '/recruitment', name: 'recruitment', component: RecruitmentManagement },
   { path: '/performance', name: 'performance', component: PerformanceManagement },
   { path: '/training', name: 'training', component: TrainingManagement },
+  { path: '/system', name: 'system', component: SystemManagement },
   
   // Dashboard submenus
   { path: '/dashboard/analytics', name: 'dashboard-analytics', component: DashboardAnalytics },

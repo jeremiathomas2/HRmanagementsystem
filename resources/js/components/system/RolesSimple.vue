@@ -6,16 +6,10 @@
         <p class="text-gray-600 mt-2">Advanced role-based access control and permission management</p>
       </div>
       <div class="flex space-x-2">
-        <button @click="createRole" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 transition-all duration-200 flex items-center shadow-md hover:shadow-lg transform hover:scale-105 font-semibold">
-          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-2H4a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2z" />
-          </svg>
+        <button @click="createRole" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
           Create Role
         </button>
-        <button @click="managePermissions" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-all duration-200 flex items-center shadow-md hover:shadow-lg transform hover:scale-105 font-semibold">
-          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <button @click="managePermissions" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
           Manage Permissions
         </button>
       </div>
@@ -23,11 +17,11 @@
 
     <!-- Role Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-      <div class="bg-white p-6 rounded-lg shadow stat-card">
+      <div class="bg-white p-6 rounded-lg shadow">
         <div class="flex items-center">
-          <div class="p-3 bg-blue-100 rounded-full stat-icon">
-            <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <div class="p-3 bg-blue-100 rounded-full">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 0112 0z" />
             </svg>
           </div>
           <div class="ml-4">
@@ -37,10 +31,10 @@
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-lg shadow stat-card">
+      <div class="bg-white p-6 rounded-lg shadow">
         <div class="flex items-center">
-          <div class="p-3 bg-green-100 rounded-full stat-icon">
-            <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-green-100 rounded-full">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -51,10 +45,10 @@
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-lg shadow stat-card">
+      <div class="bg-white p-6 rounded-lg shadow">
         <div class="flex items-center">
-          <div class="p-3 bg-purple-100 rounded-full stat-icon">
-            <svg class="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-purple-100 rounded-full">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
           </div>
@@ -65,11 +59,11 @@
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-lg shadow stat-card">
+      <div class="bg-white p-6 rounded-lg shadow">
         <div class="flex items-center">
-          <div class="p-3 bg-yellow-100 rounded-full stat-icon">
-            <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100-4m0 6a2 2 0 100-4m0 6v2m0 2a2 2 0 104 0m-4 0a2 2 0 100 4m0-4v8m0 2a2 2 0 104 0m-4-4a2 2 0 100-4" />
+          <div class="p-3 bg-yellow-100 rounded-full">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100-4m0 6a2 2 0 100-4" />
             </svg>
           </div>
           <div class="ml-4">
@@ -123,20 +117,8 @@
                 {{ role.userCount }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div class="flex space-x-2">
-                  <button @click="editRole(role)" class="p-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-900 rounded-lg transition-all duration-200 border border-indigo-200 flex items-center" title="Edit Role">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    <span class="ml-1 text-xs">Edit</span>
-                  </button>
-                  <button @click="deleteRole(role)" class="p-2 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-900 rounded-lg transition-all duration-200 border border-red-200 flex items-center" title="Delete Role">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span class="ml-1 text-xs">Delete</span>
-                  </button>
-                </div>
+                <button @click="editRole(role)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
+                <button @click="deleteRole(role)" class="text-red-600 hover:text-red-900">Delete</button>
               </td>
             </tr>
           </tbody>
@@ -145,21 +127,22 @@
     </div>
 
     <!-- Role Modal -->
-    <div v-if="showRoleModal" class="fixed inset-0 z-50 overflow-y-auto modal-centered">
-      <div class="modal-backdrop" @click="showRoleModal = false"></div>
-      <div class="relative bg-white rounded-lg shadow-2xl modal-content-centered transform transition-all duration-300 scale-100 opacity-100">
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-t-lg">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold">
-              {{ editingRole ? 'Edit Role' : 'Create New Role' }}
-            </h3>
-            <button @click="showRoleModal = false" class="text-white hover:text-gray-200 p-1 rounded-lg hover:bg-white/10 transition-colors duration-200">
-              <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+    <div v-if="showRoleModal" class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm" @click="showRoleModal = false"></div>
+        <div class="relative bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-t-lg">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">
+                {{ editingRole ? 'Edit Role' : 'Create New Role' }}
+              </h3>
+              <button @click="showRoleModal = false" class="text-white hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
 
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -199,22 +182,15 @@
           </div>
 
           <div class="flex justify-end space-x-3 px-6 py-4 bg-gray-50 rounded-b-lg">
-            <button @click="showRoleModal = false" class="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 hover:text-gray-900 transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center">
-              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              <span class="ml-2">Cancel</span>
-            </button>
-            <button @click="saveRole" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 active:bg-indigo-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 flex items-center">
-              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              <span class="ml-2">{{ editingRole ? 'Update Role' : 'Create Role' }}</span>
+            <button @click="showRoleModal = false" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cancel</button>
+            <button @click="saveRole" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              {{ editingRole ? 'Update Role' : 'Create Role' }}
             </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -355,100 +331,6 @@ export default {
 </script>
 
 <style scoped>
-/* Enhanced modal animations */
-.modal-enter-active,
-.modal-leave-active {
-  transition: all 0.3s ease;
-}
-
-.modal-enter-from {
-  opacity: 0;
-  transform: scale(0.9) translateY(-20px);
-}
-
-.modal-leave-to {
-  opacity: 0;
-  transform: scale(0.9) translateY(-20px);
-}
-
-/* Enhanced modal positioning */
-.modal-centered {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
-  padding: 1rem;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.modal-content-centered {
-  position: relative;
-  width: 100%;
-  max-width: 42rem; /* max-w-2xl */
-  max-height: 90vh;
-  max-height: 90dvh; /* Dynamic viewport height for mobile */
-  overflow-y: auto;
-  margin: auto;
-  transform: translateZ(0); /* Hardware acceleration */
-  border-radius: 0.75rem; /* rounded-lg */
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-/* Ensure modal content doesn't overflow on small screens */
-@media (max-width: 640px) {
-  .modal-content-centered {
-    margin: 1rem;
-    max-height: calc(100vh - 2rem);
-    max-height: calc(100dvh - 2rem);
-  }
-}
-
-/* Enhanced backdrop */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 40;
-  transition: all 0.3s ease;
-}
-
-/* Enhanced icon visibility */
-svg {
-  display: block;
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-  color: currentColor;
-  stroke-width: 2;
-}
-
-/* Icon button styling */
-.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.icon-button:hover {
-  transform: translateY(-1px);
-}
-
-.icon-button svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
 .blur-background {
   transition: all 0.3s ease;
   position: relative;
@@ -484,40 +366,5 @@ svg {
   pointer-events: auto !important;
   z-index: 50 !important;
   position: relative !important;
-}
-
-/* Enhanced button hover effects */
-.btn-enhanced {
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-enhanced:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.btn-enhanced:active {
-  transform: translateY(0);
-}
-
-/* Statistics card hover effect */
-.stat-card {
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.stat-card:hover .stat-icon {
-  transform: scale(1.1);
-}
-
-.stat-icon {
-  transition: transform 0.3s ease;
 }
 </style>

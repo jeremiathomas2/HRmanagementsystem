@@ -351,6 +351,43 @@
     <!-- Mobile Sidebar Overlay -->
     <div v-if="sidebarOpen" @click="toggleSidebar" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"></div>
 
+    <!-- Advanced Notification Component -->
+    <AdvancedNotification />
+
+    <!-- Idle Warning Modal -->
+    <div v-if="showIdleWarning" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div class="bg-white rounded-lg shadow-2xl p-6 max-w-md mx-4 transform transition-all duration-300 scale-100">
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Session Expiring</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Your session will expire in <span class="font-bold text-yellow-600">{{ countdownSeconds }}</span> seconds due to inactivity.
+          </p>
+          <p class="text-sm text-gray-500 mb-6">
+            Click "Continue Session" to extend your session, or you will be automatically logged out.
+          </p>
+          <div class="flex gap-3">
+            <button
+              @click="extendSession"
+              class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              Continue Session
+            </button>
+            <button
+              @click="performIdleLogout"
+              class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+            >
+              Logout Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- Main Content -->
     <div :class="['transition-all duration-300', sidebarOpen ? 'lg:ml-64' : 'lg:ml-0', 'ml-0']">
       <!-- Top Header -->
@@ -552,13 +589,83 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
+import AdvancedNotification from './AdvancedNotification.vue'
+import notification from '../utils/notification.js'
+import { idleConfig, shouldExcludeIdleDetection, getIdleTimeoutMs, getLogoutTimeoutMs, getWarningDurationMs } from '../config/idleConfig.js'
 
 export default {
   name: 'AppLayout',
+  components: {
+    AdvancedNotification
+  },
   setup() {
     const store = useStore()
     const router = useRouter()
     const route = useRoute()
+    
+    // Idle detection variables
+    let idleTimer = null
+    let warningTimer = null
+    let lastActivity = Date.now()
+    const showIdleWarning = ref(false)
+    const countdownSeconds = ref(getWarningDurationMs() / 1000)
+    
+    // Use configuration values
+    const idleTimeout = getIdleTimeoutMs()
+    const logoutTimeout = getLogoutTimeoutMs()
+    const warningTimeout = getWarningDurationMs()
+
+    // Activity tracking
+    const updateLastActivity = () => {
+      lastActivity = Date.now()
+      showIdleWarning.value = false
+      resetIdleTimer()
+    }
+
+    const resetIdleTimer = () => {
+      clearTimeout(idleTimer)
+      clearTimeout(warningTimer)
+      
+      idleTimer = setTimeout(() => {
+        displayIdleWarning()
+      }, idleTimeout - warningTimeout)
+    }
+
+    const displayIdleWarning = () => {
+      showIdleWarning.value = true
+      countdownSeconds.value = getWarningDurationMs() / 1000
+      
+      // Start countdown
+      warningTimer = setInterval(() => {
+        countdownSeconds.value--
+        if (countdownSeconds.value <= 0) {
+          clearInterval(warningTimer)
+          performIdleLogout()
+        }
+      }, 1000)
+      
+      // Show warning notification
+      notification.warning('Session Expiring', `Your session will expire in ${countdownSeconds.value} seconds due to inactivity.`)
+    }
+
+    const performIdleLogout = async () => {
+      showIdleWarning.value = false
+      notification.info('Session Expired', 'You have been logged out due to inactivity.')
+      
+      try {
+        await store.dispatch('logout')
+        setTimeout(() => {
+          window.location.href = '/login?logout=true&reason=idle'
+        }, 2000)
+      } catch (error) {
+        window.location.href = '/login?logout=true&reason=idle'
+      }
+    }
+
+    const extendSession = () => {
+      updateLastActivity()
+      notification.success('Session Extended', 'Your session has been extended for another 5 minutes.')
+    }
 
     // Sidebar state
     const sidebarOpen = ref(true)
@@ -569,13 +676,14 @@ export default {
       employees: false,
       payroll: false,
       discipline: false,
-      compliance: false,
-      attendance: false,
       leave: false,
       recruitment: false,
       performance: false,
       training: false,
-      system: false
+      attendance: false,
+      compliance: false,
+      reports: false,
+      settings: false
     })
 
     const toggleSidebar = () => {
@@ -583,7 +691,20 @@ export default {
     }
 
     const toggleDropdown = (menu) => {
+      // Close all other dropdowns
+      Object.keys(dropdowns.value).forEach(key => {
+        if (key !== menu) {
+          dropdowns.value[key] = false
+        }
+      })
+      // Toggle the current dropdown
       dropdowns.value[menu] = !dropdowns.value[menu]
+    }
+
+    const closeAllDropdowns = () => {
+      Object.keys(dropdowns.value).forEach(key => {
+        dropdowns.value[key] = false
+      })
     }
 
     const toggleDarkMode = () => {
@@ -600,6 +721,12 @@ export default {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.relative')) {
         profileDropdownOpen.value = false
+      }
+      // Close all sidebar dropdowns when clicking outside sidebar
+      if (!event.target.closest('aside')) {
+        Object.keys(dropdowns.value).forEach(key => {
+          dropdowns.value[key] = false
+        })
       }
     }
 
@@ -652,8 +779,18 @@ export default {
     })
 
     const logout = async () => {
-      await store.dispatch('logout')
-      window.location.href = '/login'
+      try {
+        // Set logout flag to skip splash screen on next login page load
+        sessionStorage.setItem('isLoggingOut', 'true')
+        
+        await store.dispatch('logout')
+        notification.success('Logged Out', 'You have been successfully logged out.')
+        setTimeout(() => {
+          window.location.href = '/login?logout=true'
+        }, 1500)
+      } catch (error) {
+        notification.error('Logout Failed', 'There was an error logging out. Please try again.')
+      }
     }
 
     const openSettings = () => {
@@ -665,6 +802,44 @@ export default {
       if (!store.state.user) {
         store.dispatch('fetchUser')
       }
+      
+      // Only set up idle detection if enabled and not on excluded page
+      if (idleConfig.enabled && !shouldExcludeIdleDetection(route.path)) {
+        // Set up activity event listeners for idle detection
+        const handleActivity = () => {
+          updateLastActivity()
+        }
+        
+        idleConfig.activityEvents.forEach(event => {
+          document.addEventListener(event, handleActivity, true)
+        })
+        
+        // Initialize idle timer
+        resetIdleTimer()
+        
+        // Store event listener references for cleanup
+        window._activityEvents = idleConfig.activityEvents
+        window._handleActivity = handleActivity
+        
+        if (idleConfig.debug) {
+          console.log('Idle detection enabled on:', route.path)
+        }
+      }
+    })
+
+    onUnmounted(() => {
+      // Clean up event listeners
+      if (window._activityEvents && window._handleActivity) {
+        window._activityEvents.forEach(event => {
+          document.removeEventListener(event, window._handleActivity, true)
+        })
+        delete window._activityEvents
+        delete window._handleActivity
+      }
+      
+      // Clear timers
+      clearTimeout(idleTimer)
+      clearTimeout(warningTimer)
     })
 
     return {
@@ -678,10 +853,17 @@ export default {
       sidebarOpen,
       toggleSidebar,
       toggleDropdown,
+      closeAllDropdowns,
       dropdowns,
       profileDropdownOpen,
       darkMode,
-      toggleDarkMode
+      toggleDarkMode,
+      handleClickOutside,
+      // Idle detection
+      showIdleWarning,
+      countdownSeconds,
+      extendSession,
+      performIdleLogout
     }
   }
 }

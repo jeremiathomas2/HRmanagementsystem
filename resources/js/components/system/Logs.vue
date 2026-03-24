@@ -244,6 +244,8 @@
 </template>
 
 <script>
+import notification from '../../utils/notification.js'
+
 export default {
   name: 'SystemLogs',
   data() {
@@ -359,16 +361,20 @@ export default {
     },
     refreshLogs() {
       console.log('Refreshing logs...')
+      notification.info('Logs Refreshed', 'System logs have been refreshed successfully.')
       // In a real application, this would fetch fresh logs from the API
     },
     exportLogs() {
-      console.log('Exporting logs...')
-      // In a real application, this would export logs to CSV/JSON
+      console.log('Exporting logs with filters:', this.filters)
+      notification.success('Export Started', 'Log export has been initiated. Download will begin shortly.')
+      // In a real application, this would export logs to CSV/PDF
     },
     clearLogs() {
       if (confirm('Are you sure you want to clear all logs? This action cannot be undone.')) {
+        console.log('Clearing logs...')
         this.logs = []
-        console.log('Logs cleared')
+        notification.warning('Logs Cleared', 'All system logs have been cleared successfully.')
+        // In a real application, this would clear logs from the database
       }
     },
     applyFilters() {
@@ -386,6 +392,8 @@ export default {
     },
     viewLogDetails(log) {
       this.selectedLog = log
+      console.log('Viewing log details:', log)
+      notification.info('Log Details', `Viewing details for ${log.level} log entry.`)
     },
     closeLogDetails() {
       this.selectedLog = null
@@ -394,6 +402,7 @@ export default {
       if (confirm('Are you sure you want to delete this log entry?')) {
         this.logs = this.logs.filter(log => log.id !== logId)
         console.log('Log deleted:', logId)
+        notification.warning('Log Deleted', 'Log entry has been deleted successfully.')
       }
     },
     previousPage() {

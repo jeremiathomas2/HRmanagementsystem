@@ -370,6 +370,8 @@
 </template>
 
 <script>
+import notification from '../../utils/notification.js'
+
 export default {
   name: 'SystemBackup',
   data() {
@@ -532,9 +534,9 @@ export default {
     },
     startBackup() {
       console.log('Starting backup:', this.newBackup)
+      notification.success('Backup Started', `Backup "${this.newBackup.name || 'System Backup'}" has been initiated successfully.`)
+      this.showBackupModal = false
       // In a real application, this would start the backup process
-      alert('Backup started successfully!')
-      this.closeBackupModal()
     },
     scheduleBackup() {
       console.log('Opening backup schedule configuration')
@@ -549,10 +551,13 @@ export default {
       // In a real application, this would open an edit modal
     },
     runNow(schedule) {
-      if (confirm(`Are you sure you want to run the backup "${schedule.name}" now?`)) {
+      if (confirm(`Are you sure you want to run backup "${schedule.name}" now?`)) {
         console.log('Running backup now:', schedule)
+        notification.info('Backup Running', `Scheduled backup "${schedule.name}" is now running.`)
         // In a real application, this would initiate immediate backup
-        alert(`Backup "${schedule.name}" started successfully!`)
+        setTimeout(() => {
+          notification.success('Backup Completed', `Backup "${schedule.name}" completed successfully!`)
+        }, 2000)
       }
     },
     toggleSchedule(schedule) {
@@ -561,30 +566,37 @@ export default {
       if (index !== -1) {
         this.scheduledBackups[index].status = newStatus
         console.log(`Schedule ${schedule.id} ${newStatus.toLowerCase()}`)
+        notification.success('Schedule Updated', `Backup schedule "${schedule.name}" has been ${newStatus.toLowerCase()}.`)
       }
     },
     deleteSchedule(scheduleId) {
       if (confirm('Are you sure you want to delete this backup schedule?')) {
+        const schedule = this.scheduledBackups.find(s => s.id === scheduleId)
         this.scheduledBackups = this.scheduledBackups.filter(s => s.id !== scheduleId)
         console.log('Schedule deleted:', scheduleId)
+        notification.warning('Schedule Deleted', `Backup schedule "${schedule.name}" has been deleted.`)
       }
     },
     downloadBackup(backup) {
       console.log('Downloading backup:', backup)
+      notification.success('Download Started', `Backup "${backup.date}" is being downloaded.`)
       // In a real application, this would initiate download
     },
     restoreBackup(backup) {
       if (confirm(`Are you sure you want to restore backup from ${backup.date}? This will overwrite current data.`)) {
         console.log('Restoring backup:', backup)
+        notification.warning('Restore Started', `System restore from backup "${backup.date}" has been initiated.`)
         // In a real application, this would initiate restore process
       }
     },
     deleteBackup(backupId) {
       if (confirm('Are you sure you want to delete this backup? This action cannot be undone.')) {
+        const backup = this.backups.find(b => b.id === backupId)
         this.backups = this.backups.filter(b => b.id !== backupId)
         console.log('Backup deleted:', backupId)
+        notification.error('Backup Deleted', `Backup "${backup.date}" has been permanently deleted.`)
       }
-    }
+    },
   }
 }
 </script>
