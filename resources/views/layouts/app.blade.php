@@ -205,6 +205,20 @@
             width: 14px;
             height: 14px;
         }
+        
+        /* Icon visibility fixes */
+        [data-icon] svg {
+            display: inline-block !important;
+            vertical-align: middle !important;
+            width: 1em !important;
+            height: 1em !important;
+        }
+        
+        [data-icon] {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50 antialiased">

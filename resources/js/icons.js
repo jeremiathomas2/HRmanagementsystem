@@ -1,4 +1,5 @@
 // Icon Helper for Blade Templates
+import './icon-fallbacks';
 import { 
     Home, 
     Users, 
@@ -71,21 +72,72 @@ window.renderIcon = function(iconName, className = 'h-5 w-5') {
   const iconClass = window.Icons[iconName];
   if (!iconClass) {
     console.warn(`Icon "${iconName}" not found`);
-    return '';
+    return `<svg class="${className}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6h6m-9 12l2 2m0 0l2-2m-2 2l2 2m7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`;
   }
   
-  return iconClass.render({
-    class: className
+  try {
+    // Create SVG element manually
+    const svg = iconClass.render({
+      class: className,
+      'aria-hidden': 'true',
+      'fill': 'none',
+      'stroke': 'currentColor',
+      'stroke-width': '2',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      'viewBox': '0 0 24 24'
+    });
+    
+    return svg;
+  } catch (error) {
+    console.error(`Error rendering icon "${iconName}":`, error);
+    return `<svg class="${className}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6h6m-9 12l2 2m0 0l2-2m-2 2l2 2m7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`;
+  }
+};
+
+// Manual icon rendering function
+window.renderAllIcons = function() {
+  const iconElements = document.querySelectorAll('[data-icon]');
+  console.log(`Rendering ${iconElements.length} icons`);
+  
+  iconElements.forEach((element, index) => {
+    const iconName = element.getAttribute('data-icon');
+    const className = element.getAttribute('class') || 'h-5 w-5';
+    
+    try {
+      const svgContent = window.renderIcon(iconName, className);
+      element.innerHTML = svgContent;
+      
+      // Ensure the SVG is visible
+      const svg = element.querySelector('svg');
+      if (svg) {
+        svg.style.display = 'inline-block';
+        svg.style.verticalAlign = 'middle';
+        svg.style.width = '1em';
+        svg.style.height = '1em';
+      }
+      
+      console.log(`Icon ${index + 1}/${iconElements.length}: ${iconName} rendered`);
+    } catch (error) {
+      console.error(`Failed to render icon ${iconName}:`, error);
+    }
   });
 };
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-  // Replace all icon placeholders
-  const iconElements = document.querySelectorAll('[data-icon]');
-  iconElements.forEach(element => {
-    const iconName = element.getAttribute('data-icon');
-    const className = element.getAttribute('class') || 'h-5 w-5';
-    element.innerHTML = window.renderIcon(iconName, className);
-  });
+  console.log('DOM loaded, initializing icons...');
+  setTimeout(window.renderAllIcons, 100);
 });
+
+// Also initialize when window is fully loaded
+window.addEventListener('load', function() {
+  console.log('Window loaded, checking icons...');
+  setTimeout(window.renderAllIcons, 200);
+});
+
+// Make function globally available for manual testing
+window.testIcons = function() {
+  console.log('Testing icon rendering...');
+  window.renderAllIcons();
+};
