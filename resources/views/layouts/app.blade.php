@@ -224,6 +224,23 @@
 <body class="bg-gray-50 antialiased">
     @include('partials.notifications')
     
+    <script>
+        // Test icon rendering after page load
+        setTimeout(() => {
+            console.log('Testing icon rendering...');
+            if (window.testIcons) {
+                window.testIcons();
+            } else {
+                // Manual test
+                const testIcon = document.querySelector('[data-icon="home"]');
+                if (testIcon) {
+                    testIcon.innerHTML = '<svg class="h-5 w-5" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7m-7-7v8m0 0l-7 7m7 7v8m0 0a9 9 0 00-9 9 9 9 0 0118 0z"></path></svg>';
+                    console.log('Manual icon test applied');
+                }
+            }
+        }, 500);
+    </script>
+    
     <div class="min-h-screen bg-gray-100 flex">
         <!-- Sidebar -->
         @include('partials.sidebar')

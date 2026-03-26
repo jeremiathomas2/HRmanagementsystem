@@ -69,30 +69,14 @@ window.Icons = {
 
 // Helper function to render icon
 window.renderIcon = function(iconName, className = 'h-5 w-5') {
-  const iconClass = window.Icons[iconName];
-  if (!iconClass) {
-    console.warn(`Icon "${iconName}" not found`);
-    return `<svg class="${className}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6h6m-9 12l2 2m0 0l2-2m-2 2l2 2m7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`;
+  // Use fallback directly for now
+  const fallback = window.IconFallbacks[iconName];
+  if (fallback) {
+    return fallback.replace('class="h-5 w-5"', `class="${className}"`);
   }
   
-  try {
-    // Create SVG element manually
-    const svg = iconClass.render({
-      class: className,
-      'aria-hidden': 'true',
-      'fill': 'none',
-      'stroke': 'currentColor',
-      'stroke-width': '2',
-      'stroke-linecap': 'round',
-      'stroke-linejoin': 'round',
-      'viewBox': '0 0 24 24'
-    });
-    
-    return svg;
-  } catch (error) {
-    console.error(`Error rendering icon "${iconName}":`, error);
-    return `<svg class="${className}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6h6m-9 12l2 2m0 0l2-2m-2 2l2 2m7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`;
-  }
+  // Default fallback
+  return `<svg class="${className}" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6h6m-9 12l2 2m0 0l2-2m-2 2l2 2m7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`;
 };
 
 // Manual icon rendering function
