@@ -17,7 +17,8 @@
     },
     "dependencies": {
         "@headlessui/vue": "^1.7.16",
-        "@heroicons/vue": "^2.0.18",
+        "@heroicons/react": "^2.2.0",
+        "@heroicons/vue": "^2.2.0",
         "axios": "^1.11.0",
         "bcryptjs": "^2.4.3",
         "chart.js": "^4.4.0",
@@ -26,6 +27,7 @@
         "express-rate-limit": "^7.1.5",
         "helmet": "^7.1.0",
         "jsonwebtoken": "^9.0.2",
+        "lucide": "^1.7.0",
         "moment": "^2.29.4",
         "mysql2": "^3.6.5",
         "nodemailer": "^6.9.7",
