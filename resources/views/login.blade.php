@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login - Tanzania HR Management System</title>
+    <title>Login - Orvion | HR management System</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -136,8 +136,8 @@
             @csrf
             <!-- Logo -->
             <div class="flex justify-center mb-8">
-                <div class="w-12 h-12 logo-enhanced rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-xl">HR</span>
+                <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                    <img src="{{ asset('images/logos/orvion-logo.png') }}" alt="Orvion" class="w-12 h-12 object-contain">
                 </div>
             </div>
             
@@ -149,7 +149,7 @@
                 Welcome to
             </p>
             <p class="text-center text-sm text-gray-200 mb-8">
-                HR Management System
+                Orvion | HR management System
             </p>
             
             <!-- Error Message -->

@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [
     laravel({
       input: [
-        resolve('resources/css/app.css'), 
-        resolve('resources/js/app-blade.js')
+        'resources/css/app.css', 
+        'resources/js/app-blade.js'
       ],
       refresh: true,
     }),
@@ -17,10 +17,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['vue'],
-          app: ['resources/js/app-blade.js']
-        }
+        manualChunks: undefined, // Let Vite handle chunking automatically
       }
     }
   },

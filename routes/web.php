@@ -43,9 +43,20 @@ Route::post('/login/process', function (Request $request) {
 
 // Protected routes (authentication required)
 Route::middleware(['web', 'auth'])->group(function () {
+    // Dashboard
     Route::get('/dashboard', function () {
         return view('dashboard');
-    })->name('dashboard');
+    })->name('dashboard')->middleware('auth');
+
+    // Profile
+    Route::get('/profile', function () {
+        return view('profile');
+    })->name('profile')->middleware('auth');
+
+    // Settings
+    Route::get('/settings', function () {
+        return view('settings');
+    })->name('settings')->middleware('auth');
     
     // Logout route
     Route::post('/logout', function () {
@@ -247,10 +258,6 @@ Route::middleware(['web', 'auth'])->group(function () {
     })->name('system.security');
     
     // Convenience redirects
-    Route::get('/settings', function () {
-        return redirect()->route('system.settings');
-    })->name('settings.redirect');
-    
     Route::get('/users', function () {
         return redirect()->route('system.users');
     })->name('users.redirect');
