@@ -732,7 +732,77 @@
     <!-- JavaScript -->
     <script src="{{ asset('resources/js/app-blade.js') }}" defer></script>
     
-    <!-- Enhanced Profile Dropdown Script -->
+    <!-- Enhanced Dropdown Functionality -->
+    <script>
+    // Notification System
+    function showNotification(type, title, message) {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification-toast');
+        existingNotifications.forEach(notification => notification.remove());
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification-toast fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+        
+        // Set background color based on type
+        const bgColors = {
+            'success': 'bg-green-500',
+            'error': 'bg-red-500',
+            'warning': 'bg-yellow-500',
+            'info': 'bg-blue-500'
+        };
+        
+        notification.classList.add(bgColors[type] || 'bg-gray-500');
+        
+        // Create notification content
+        notification.innerHTML = `
+            <div class="flex items-center text-white">
+                <div class="flex-shrink-0">
+                    ${getNotificationIcon(type)}
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium">${title}</p>
+                    <p class="text-sm">${message}</p>
+                </div>
+                <div class="ml-4 flex-shrink-0">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+            notification.classList.add('translate-x-0');
+        }, 100);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+    }
+    
+    function getNotificationIcon(type) {
+        const icons = {
+            'success': '<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>',
+            'error': '<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>',
+            'warning': '<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>',
+            'info': '<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>'
+        };
+        return icons[type] || icons['info'];
+    }
+    
+    // Enhanced Profile Dropdown Script
     function toggleProfileDropdown() {
         console.log('Profile dropdown toggle called');
         const dropdown = document.getElementById('profile-dropdown');
@@ -778,7 +848,6 @@
         }
     }
     
-    // Handle clicks outside the profile dropdown
     function handleProfileDropdownClickOutside(event) {
         const dropdown = document.getElementById('profile-dropdown');
         const button = document.querySelector('[data-profile-btn="true"]');
@@ -805,158 +874,27 @@
         }
     }
     
-    // Initialize profile dropdown on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Initializing profile dropdown...');
-        
-        // Test profile dropdown functionality
-        const profileButton = document.querySelector('[data-profile-btn="true"]');
-        const dropdown = document.getElementById('profile-dropdown');
-        
-        if (profileButton) {
-            console.log('Profile button found:', profileButton);
-            
-            // Add click event listener
-            profileButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleProfileDropdown();
-            });
-            
-            // Add keyboard support
-            profileButton.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    toggleProfileDropdown();
-                }
-            });
-        }
-        
-        if (dropdown) {
-            console.log('Profile dropdown found:', dropdown);
-            
-            // Add hover effects
-            dropdown.addEventListener('mouseenter', function() {
-                this.classList.remove('scale-95');
-                this.classList.add('scale-100');
-            });
-            
-            dropdown.addEventListener('mouseleave', function() {
-                this.classList.remove('scale-100');
-                this.classList.add('scale-95');
-            });
-        }
-        
-        // Add escape key support
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const dropdown = document.getElementById('profile-dropdown');
-                const button = document.querySelector('[data-profile-btn="true"]');
-                
-                if (dropdown && !dropdown.classList.contains('hidden')) {
-                    toggleProfileDropdown();
-                }
-            }
-        });
-        
-        // Auto-initialize on page load
-        setTimeout(() => {
-            console.log('Auto-testing profile dropdown...');
-            const profileButton = document.querySelector('[data-profile-btn="true"]');
-            const dropdown = document.getElementById('profile-dropdown');
-            
-            if (profileButton && dropdown) {
-                console.log('Testing profile dropdown click...');
-                profileButton.click();
-                
-                setTimeout(() => {
-                    console.log('Checking dropdown state...');
-                    console.log('Dropdown visible:', !dropdown.classList.contains('hidden'));
-                    console.log('Button aria-expanded:', profileButton.getAttribute('aria-expanded'));
-                }, 500);
-                
-                // Test mouse leave
-                setTimeout(() => {
-                    console.log('Testing mouse leave...');
-                    const leaveEvent = new MouseEvent('mouseleave', {
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    dropdown.dispatchEvent(leaveEvent);
-                    
-                    setTimeout(() => {
-                        console.log('Dropdown hidden after mouse leave:', dropdown.classList.contains('hidden'));
-                    }, 500);
-                }, 1000);
-            }
-        }, 2000);
-    });
-    });
-    
-    // Toggle Sidebar Function
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('top-header');
-        const menuButton = event.currentTarget;
-        
-        if (sidebar.classList.contains('-translate-x-full')) {
-            // Show sidebar
-            sidebar.classList.remove('-translate-x-full');
-            sidebar.classList.add('translate-x-0');
-            
-            // Adjust main content and header
-            mainContent.classList.add('ml-64');
-            header.classList.add('left-64');
-            header.classList.remove('left-0');
-            
-            // Update menu button appearance
-            menuButton.classList.add('bg-gray-200');
-            menuButton.setAttribute('aria-expanded', 'true');
-        } else {
-            // Hide sidebar
-            sidebar.classList.remove('translate-x-0');
-            sidebar.classList.add('-translate-x-full');
-            
-            // Adjust main content and header
-            mainContent.classList.remove('ml-64');
-            header.classList.remove('left-64');
-            header.classList.add('left-0');
-            
-            // Update menu button appearance
-            menuButton.classList.remove('bg-gray-200');
-            menuButton.setAttribute('aria-expanded', 'false');
-        }
-        
-        console.log('Sidebar toggled:', sidebar.classList.contains('-translate-x-full') ? 'hidden' : 'visible');
-    }
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const dropdown = document.getElementById('profile-dropdown');
-        const button = document.querySelector('[data-profile-btn="true"]');
-        
-        if (dropdown && !dropdown.classList.contains('hidden')) {
-            if (!dropdown.contains(event.target) && (!button || !button.contains(event.target))) {
-                // Hide dropdown with animation
-                dropdown.classList.remove('scale-100', 'opacity-100');
-                dropdown.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    dropdown.classList.add('hidden');
-                }, 200);
-            }
-        }
-    });
-    
     // Header Company Switcher
     function toggleHeaderCompanySwitcher() {
+        console.log('Company switcher toggle called');
         const dropdown = document.getElementById('header-company-dropdown');
         if (dropdown) {
-            dropdown.classList.toggle('hidden');
+            const isHidden = dropdown.classList.contains('hidden');
+            console.log('Company dropdown isHidden:', isHidden);
+            
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                dropdown.classList.add('animate-fade-in');
+            } else {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('animate-fade-in');
+            }
         }
     }
     
     function switchHeaderCompany(companyId, companyName) {
+        console.log('Switching to company:', companyId, companyName);
+        
         // Update current company name display
         const currentCompanyElement = document.getElementById('current-company-name');
         if (currentCompanyElement) {
@@ -976,9 +914,7 @@
         }
         
         // Show notification
-        if (typeof showNotification === 'function') {
-            showNotification('success', 'Company Switched', `Successfully switched to ${companyName}`);
-        }
+        showNotification('success', 'Company Switched', `Successfully switched to ${companyName}`);
         
         // Store company preference
         localStorage.setItem('activeCompany', companyId);
@@ -1236,20 +1172,49 @@
         console.log(`Updated sidebar menu for ${companyName}`);
     }
     
-    // Close header company dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const dropdown = document.getElementById('header-company-dropdown');
-        const button = event.target.closest('[onclick*="toggleHeaderCompanySwitcher"]');
-        
-        if (dropdown && !dropdown.classList.contains('hidden')) {
-            if (!button && !dropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        }
-    });
-    
-    // Initialize default company on page load
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initializing dropdowns and company switcher...');
+        
+        // Test profile dropdown functionality
+        const profileButton = document.querySelector('[data-profile-btn="true"]');
+        const dropdown = document.getElementById('profile-dropdown');
+        
+        if (profileButton) {
+            console.log('Profile button found:', profileButton);
+            
+            // Add click event listener
+            profileButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleProfileDropdown();
+            });
+            
+            // Add keyboard support
+            profileButton.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleProfileDropdown();
+                }
+            });
+        }
+        
+        if (dropdown) {
+            console.log('Profile dropdown found:', dropdown);
+            
+            // Add hover effects
+            dropdown.addEventListener('mouseenter', function() {
+                this.classList.remove('scale-95');
+                this.classList.add('scale-100');
+            });
+            
+            dropdown.addEventListener('mouseleave', function() {
+                this.classList.remove('scale-100');
+                this.classList.add('scale-95');
+            });
+        }
+        
+        // Initialize company switcher
         const activeCompany = localStorage.getItem('activeCompany') || 'tcc';
         const activeCompanyName = localStorage.getItem('activeCompanyName') || 'Tanzania Cigarette Company (TCC)';
         
@@ -1261,7 +1226,85 @@
         
         // Update sidebar menu for default company
         updateSidebarMenu(activeCompany, activeCompanyName);
+        
+        // Add escape key support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const dropdown = document.getElementById('profile-dropdown');
+                const button = document.querySelector('[data-profile-btn="true"]');
+                
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    toggleProfileDropdown();
+                }
+                
+                // Also close company dropdown
+                const companyDropdown = document.getElementById('header-company-dropdown');
+                if (companyDropdown && !companyDropdown.classList.contains('hidden')) {
+                    companyDropdown.classList.add('hidden');
+                }
+            }
+        });
+        
+        console.log('Dropdowns and company switcher initialized successfully');
     });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        // Profile dropdown
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const profileButton = document.querySelector('[data-profile-btn="true"]');
+        
+        if (profileDropdown && !profileDropdown.classList.contains('hidden')) {
+            if (!profileDropdown.contains(event.target) && (!profileButton || !profileButton.contains(event.target))) {
+                toggleProfileDropdown();
+            }
+        }
+        
+        // Company dropdown
+        const companyDropdown = document.getElementById('header-company-dropdown');
+        const companyButton = event.target.closest('[onclick*="toggleHeaderCompanySwitcher"]');
+        
+        if (companyDropdown && !companyDropdown.classList.contains('hidden')) {
+            if (!companyButton && !companyDropdown.contains(event.target)) {
+                companyDropdown.classList.add('hidden');
+            }
+        }
+    });
+    
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fade-in 0.2s ease-out;
+        }
+        
+        .notification-toast {
+            min-width: 300px;
+            max-width: 500px;
+        }
+        
+        .translate-x-full {
+            transform: translateX(100%);
+        }
+        
+        .translate-x-0 {
+            transform: translateX(0);
+        }
+    `;
+    document.head.appendChild(style);
+    
+    console.log('Enhanced dropdown system loaded');
     </script>
     
     @stack('scripts')
