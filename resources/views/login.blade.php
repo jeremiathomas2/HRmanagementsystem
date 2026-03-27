@@ -259,7 +259,8 @@
             border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background: #f9fafb;
+            background: white;
+            color: #070029;
         }
         
         .form-input:focus {
@@ -267,6 +268,7 @@
             border-color: #070029;
             box-shadow: 0 0 0 3px rgba(7, 0, 41, 0.1);
             background: white;
+            color: #070029;
         }
         
         .form-input::placeholder {
@@ -721,9 +723,9 @@
             }
             
             .form-input {
-                background: #4b5563;
+                background: white;
                 border-color: #6b7280;
-                color: white;
+                color: #070029;
             }
             
             .form-input::placeholder {
