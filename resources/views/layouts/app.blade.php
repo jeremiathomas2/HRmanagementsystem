@@ -732,30 +732,166 @@
     <!-- JavaScript -->
     <script src="{{ asset('resources/js/app-blade.js') }}" defer></script>
     
-    <!-- Simple Profile Dropdown Script -->
-    <script>
+    <!-- Enhanced Profile Dropdown Script -->
     function toggleProfileDropdown() {
         console.log('Profile dropdown toggle called');
         const dropdown = document.getElementById('profile-dropdown');
-        if (dropdown) {
-            const isHidden = dropdown.classList.contains('hidden');
-            if (isHidden) {
-                // Show dropdown with animation
-                dropdown.classList.remove('hidden');
-                setTimeout(() => {
-                    dropdown.classList.remove('scale-95', 'opacity-0');
-                    dropdown.classList.add('scale-100', 'opacity-100');
-                }, 10);
-            } else {
-                // Hide dropdown with animation
-                dropdown.classList.remove('scale-100', 'opacity-100');
-                dropdown.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    dropdown.classList.add('hidden');
-                }, 200);
+        const button = document.querySelector('[data-profile-btn="true"]');
+        
+        if (!dropdown) {
+            console.error('Profile dropdown element not found');
+            return;
+        }
+        
+        const isHidden = dropdown.classList.contains('hidden');
+        console.log('Profile dropdown isHidden:', isHidden);
+        
+        if (isHidden) {
+            // Show dropdown with animation
+            dropdown.classList.remove('hidden');
+            dropdown.classList.remove('scale-95', 'opacity-0');
+            dropdown.classList.add('scale-100', 'opacity-100');
+            
+            // Update button state
+            if (button) {
+                button.classList.add('bg-gray-200');
+                button.setAttribute('aria-expanded', 'true');
             }
+            
+            // Add click outside listener
+            setTimeout(() => {
+                document.addEventListener('click', handleProfileDropdownClickOutside);
+            }, 100);
+        } else {
+            // Hide dropdown with animation
+            dropdown.classList.remove('scale-100', 'opacity-100');
+            dropdown.classList.add('scale-95', 'opacity-0');
+            
+            // Update button state
+            if (button) {
+                button.classList.remove('bg-gray-200');
+                button.setAttribute('aria-expanded', 'false');
+            }
+            
+            // Remove click outside listener
+            document.removeEventListener('click', handleProfileDropdownClickOutside);
         }
     }
+    
+    // Handle clicks outside the profile dropdown
+    function handleProfileDropdownClickOutside(event) {
+        const dropdown = document.getElementById('profile-dropdown');
+        const button = document.querySelector('[data-profile-btn="true"]');
+        
+        // Check if click is outside dropdown and button
+        if (dropdown && !dropdown.contains(event.target) && 
+            button && !button.contains(event.target) &&
+            !event.target.closest('#profile-dropdown') &&
+            !event.target.closest('[data-profile-btn="true"]')) {
+            
+            // Hide dropdown
+            dropdown.classList.add('hidden');
+            dropdown.classList.remove('scale-100', 'opacity-100');
+            dropdown.classList.add('scale-95', 'opacity-0');
+            
+            // Update button state
+            if (button) {
+                button.classList.remove('bg-gray-200');
+                button.setAttribute('aria-expanded', 'false');
+            }
+            
+            // Remove click outside listener
+            document.removeEventListener('click', handleProfileDropdownClickOutside);
+        }
+    }
+    
+    // Initialize profile dropdown on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initializing profile dropdown...');
+        
+        // Test profile dropdown functionality
+        const profileButton = document.querySelector('[data-profile-btn="true"]');
+        const dropdown = document.getElementById('profile-dropdown');
+        
+        if (profileButton) {
+            console.log('Profile button found:', profileButton);
+            
+            // Add click event listener
+            profileButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleProfileDropdown();
+            });
+            
+            // Add keyboard support
+            profileButton.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleProfileDropdown();
+                }
+            });
+        }
+        
+        if (dropdown) {
+            console.log('Profile dropdown found:', dropdown);
+            
+            // Add hover effects
+            dropdown.addEventListener('mouseenter', function() {
+                this.classList.remove('scale-95');
+                this.classList.add('scale-100');
+            });
+            
+            dropdown.addEventListener('mouseleave', function() {
+                this.classList.remove('scale-100');
+                this.classList.add('scale-95');
+            });
+        }
+        
+        // Add escape key support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const dropdown = document.getElementById('profile-dropdown');
+                const button = document.querySelector('[data-profile-btn="true"]');
+                
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    toggleProfileDropdown();
+                }
+            }
+        });
+        
+        // Auto-initialize on page load
+        setTimeout(() => {
+            console.log('Auto-testing profile dropdown...');
+            const profileButton = document.querySelector('[data-profile-btn="true"]');
+            const dropdown = document.getElementById('profile-dropdown');
+            
+            if (profileButton && dropdown) {
+                console.log('Testing profile dropdown click...');
+                profileButton.click();
+                
+                setTimeout(() => {
+                    console.log('Checking dropdown state...');
+                    console.log('Dropdown visible:', !dropdown.classList.contains('hidden'));
+                    console.log('Button aria-expanded:', profileButton.getAttribute('aria-expanded'));
+                }, 500);
+                
+                // Test mouse leave
+                setTimeout(() => {
+                    console.log('Testing mouse leave...');
+                    const leaveEvent = new MouseEvent('mouseleave', {
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    dropdown.dispatchEvent(leaveEvent);
+                    
+                    setTimeout(() => {
+                        console.log('Dropdown hidden after mouse leave:', dropdown.classList.contains('hidden'));
+                    }, 500);
+                }, 1000);
+            }
+        }, 2000);
+    });
+    });
     
     // Toggle Sidebar Function
     function toggleSidebar() {

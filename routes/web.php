@@ -19,13 +19,50 @@ Route::get('/splash', function () {
 
 // Login process route (accessible without auth)
 Route::post('/login/process', function (Request $request) {
+    // Temporarily disable CSRF for testing
+    // Debug logging
+    \Log::info('Login attempt', [
+        'username' => $request->get('username'),
+        'has_password' => !empty($request->get('password')),
+        'remember' => $request->get('remember')
+    ]);
+    
     $credentials = $request->validate([
         'username' => 'required|string|max:255',
         'password' => 'required|string|min:6',
         'remember' => 'boolean'
     ]);
 
-    if (Auth::attempt($credentials, $request->filled('remember'))) {
+    // Find user by username first
+    $user = \App\Models\User::where('username', $credentials['username'])->first();
+    
+    if (!$user) {
+        \Log::warning('Login failed - user not found', ['username' => $credentials['username']]);
+        return redirect()->back()
+            ->withErrors([
+                'username' => 'The provided username does not exist.',
+            ])
+            ->withInput($request->only('username', 'remember'));
+    }
+
+    // Check password
+    if (!\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        \Log::warning('Login failed - wrong password', ['username' => $credentials['username']]);
+        return redirect()->back()
+            ->withErrors([
+                'password' => 'The provided password is incorrect.',
+            ])
+            ->withInput($request->only('username', 'remember'));
+    }
+
+    // Use Auth::attempt with email credentials
+    $emailCredentials = [
+        'email' => $user->email,
+        'password' => $credentials['password']
+    ];
+
+    if (\Illuminate\Support\Facades\Auth::attempt($emailCredentials, $request->filled('remember'))) {
+        \Log::info('Login successful', ['username' => $credentials['username'], 'email' => $user->email]);
         $request->session()->regenerate();
         
         return redirect()->intended('dashboard')
@@ -33,10 +70,11 @@ Route::post('/login/process', function (Request $request) {
     }
 
     // If login fails, redirect back with error
+    \Log::error('Login failed - Auth::attempt failed', ['username' => $credentials['username']]);
     return redirect()->back()
         ->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-            'password' => 'The provided password is incorrect.',
+            'username' => 'Login failed. Please try again.',
+            'password' => 'Login failed. Please try again.',
         ])
         ->withInput($request->only('username', 'remember'));
 })->name('login.process');
@@ -219,6 +257,49 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/training/certificates', function () {
         return view('training.certificates');
     })->name('training.certificates');
+    
+    // Employee Transfer Management routes
+    Route::get('/employee-transfers', [EmployeeTransferController::class, 'index'])->name('employee-transfers');
+    Route::get('/employee-transfers/create', [EmployeeTransferController::class, 'create'])->name('employee-transfers.create');
+    Route::post('/employee-transfers', [EmployeeTransferController::class, 'store'])->name('employee-transfers.store');
+    Route::get('/employee-transfers/{transfer}', [EmployeeTransferController::class, 'show'])->name('employee-transfers.show');
+    Route::post('/employee-transfers/{transfer}/approve', [EmployeeTransferController::class, 'approve'])->name('employee-transfers.approve');
+    Route::post('/employee-transfers/{transfer}/reject', [EmployeeTransferController::class, 'reject'])->name('employee-transfers.reject');
+    Route::post('/employee-transfers/{transfer}/cancel', [EmployeeTransferController::class, 'cancel'])->name('employee-transfers.cancel');
+    Route::get('/employee-transfers/{transfer}/risk-assessment', [EmployeeTransferController::class, 'riskAssessment'])->name('employee-transfers.risk-assessment');
+    Route::get('/employee-transfers/{transfer}/documents', [EmployeeTransferController::class, 'documents'])->name('employee-transfers.documents');
+    
+    // Legal Case Management routes
+    Route::get('/legal-cases', [LegalCaseController::class, 'index'])->name('legal-cases');
+    Route::get('/legal-cases/create', [LegalCaseController::class, 'create'])->name('legal-cases.create');
+    Route::post('/legal-cases', [LegalCaseController::class, 'store'])->name('legal-cases.store');
+    Route::get('/legal-cases/{case}', [LegalCaseController::class, 'show'])->name('legal-cases.show');
+    Route::get('/legal-cases/{case}/edit', [LegalCaseController::class, 'edit'])->name('legal-cases.edit');
+    Route::put('/legal-cases/{case}', [LegalCaseController::class, 'update'])->name('legal-cases.update');
+    Route::post('/legal-cases/{case}/assign', [LegalCaseController::class, 'assign'])->name('legal-cases.assign');
+    Route::post('/legal-cases/{case}/status', [LegalCaseController::class, 'updateStatus'])->name('legal-cases.update-status');
+    Route::post('/legal-cases/{case}/evidence', [LegalCaseController::class, 'addEvidence'])->name('legal-cases.add-evidence');
+    Route::get('/legal-cases/{case}/cma-readiness', [LegalCaseController::class, 'cmaReadiness'])->name('legal-cases.cma-readiness');
+    Route::get('/legal-cases/{case}/case-file', [LegalCaseController::class, 'generateCaseFile'])->name('legal-cases.case-file');
+    Route::post('/legal-cases/{case}/escalate', [LegalCaseController::class, 'escalate'])->name('legal-cases.escalate');
+    Route::post('/legal-cases/{case}/resolve', [LegalCaseController::class, 'resolve'])->name('legal-cases.resolve');
+    
+    // Compliance Monitoring routes
+    Route::get('/compliance-monitoring', [ComplianceMonitoringController::class, 'index'])->name('compliance-monitoring');
+    Route::get('/compliance-monitoring/create', [ComplianceMonitoringController::class, 'create'])->name('compliance-monitoring.create');
+    Route::post('/compliance-monitoring', [ComplianceMonitoringController::class, 'store'])->name('compliance-monitoring.store');
+    Route::get('/compliance-monitoring/{monitoring}', [ComplianceMonitoringController::class, 'show'])->name('compliance-monitoring.show');
+    Route::put('/compliance-monitoring/{monitoring}', [ComplianceMonitoringController::class, 'update'])->name('compliance-monitoring.update');
+    Route::get('/compliance-monitoring/dashboard', [ComplianceMonitoringController::class, 'dashboard'])->name('compliance-monitoring.dashboard');
+    
+    // Risk Assessment routes
+    Route::get('/risk-assessments', [RiskAssessmentController::class, 'index'])->name('risk-assessments');
+    Route::get('/risk-assessments/create', [RiskAssessmentController::class, 'create'])->name('risk-assessments.create');
+    Route::post('/risk-assessments', [RiskAssessmentController::class, 'store'])->name('risk-assessments.store');
+    Route::get('/risk-assessments/{assessment}', [RiskAssessmentController::class, 'show'])->name('risk-assessments.show');
+    Route::put('/risk-assessments/{assessment}', [RiskAssessmentController::class, 'update'])->name('risk-assessments.update');
+    Route::post('/risk-assessments/{assessment}/approve', [RiskAssessmentController::class, 'approve'])->name('risk-assessments.approve');
+    Route::get('/risk-assessments/dashboard', [RiskAssessmentController::class, 'dashboard'])->name('risk-assessments.dashboard');
     
     // System Management routes
     Route::get('/system', function () {

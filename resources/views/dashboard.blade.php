@@ -1115,6 +1115,384 @@ window.scheduleInterview = function() {
     showNotification('success', 'Interview Scheduled', 'Interview has been scheduled successfully');
     closeModal();
 };
+
+// Comprehensive menu functionality
+window.quickAction = function(action) {
+    switch(action) {
+        case 'add-employee':
+            window.location.href = '/employees/add';
+            break;
+        case 'view-payroll':
+            window.location.href = '/payroll';
+            break;
+        case 'approve-leave':
+            window.location.href = '/leave';
+            break;
+        case 'generate-report':
+            showNotification('info', 'Report Generation', 'Opening report generation interface...');
+            setTimeout(() => {
+                window.location.href = '/payroll/reports';
+            }, 1000);
+            break;
+        case 'schedule-interview':
+            window.location.href = '/recruitment/interviews';
+            break;
+        case 'performance-review':
+            window.location.href = '/performance';
+            break;
+        case 'compliance-check':
+            window.location.href = '/compliance';
+            break;
+        case 'training-session':
+            window.location.href = '/training';
+            break;
+        case 'backup-system':
+            showNotification('info', 'System Backup', 'Starting backup process...');
+            setTimeout(() => {
+                window.location.href = '/system/backup';
+            }, 1000);
+            break;
+        case 'system-settings':
+            window.location.href = '/system/settings';
+            break;
+        case 'help-support':
+            showNotification('info', 'Help & Support', 'Opening help documentation...');
+            setTimeout(() => {
+                window.open('/help', '_blank');
+            }, 1000);
+            break;
+        default:
+            showNotification('warning', 'Unknown Action', 'The requested action is not available');
+    }
+};
+
+// Menu navigation functionality
+window.navigateTo = function(section, subsection = null) {
+    const routes = {
+        'dashboard': '/dashboard',
+        'employees': '/employees',
+        'add-employee': '/employees/add',
+        'contracts': '/employees/contracts',
+        'departments': '/employees/departments',
+        'payroll': '/payroll',
+        'payroll-history': '/payroll/history',
+        'statutory-deductions': '/payroll/statutory',
+        'payroll-reports': '/payroll/reports',
+        'discipline': '/discipline',
+        'compliance': '/compliance',
+        'attendance': '/attendance',
+        'leave': '/leave',
+        'recruitment': '/recruitment',
+        'performance': '/performance',
+        'training': '/training',
+        'system': '/system',
+        'system-settings': '/system/settings',
+        'system-users': '/system/users',
+        'system-roles': '/system/roles',
+        'system-backup': '/system/backup',
+        'system-logs': '/system/logs',
+        'system-maintenance': '/system/maintenance',
+        'system-integrations': '/system/integrations',
+        'system-security': '/system/security',
+        'employee-transfers': '/employee-transfers',
+        'legal-cases': '/legal-cases',
+        'compliance-monitoring': '/compliance-monitoring',
+        'risk-assessments': '/risk-assessments'
+    };
+    
+    const url = subsection && routes[subsection] ? routes[subsection] : routes[section];
+    
+    if (url) {
+        showNotification('info', 'Navigation', `Navigating to ${subsection || section}...`);
+        setTimeout(() => {
+            window.location.href = url;
+        }, 500);
+    } else {
+        showNotification('error', 'Navigation Error', `Route not found for ${subsection || section}`);
+    }
+};
+
+// Enhanced dropdown functionality
+window.toggleDropdown = function(menuId) {
+    const dropdown = document.getElementById(menuId + '-dropdown');
+    const allDropdowns = document.querySelectorAll('[id$="-dropdown"]');
+    
+    // Close all other dropdowns
+    allDropdowns.forEach(d => {
+        if (d.id !== menuId + '-dropdown') {
+            d.classList.add('hidden');
+        }
+    });
+    
+    // Toggle current dropdown
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+    }
+};
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('button[onclick*="toggleDropdown"]') && !event.target.closest('[id$="-dropdown"]')) {
+        const allDropdowns = document.querySelectorAll('[id$="-dropdown"]');
+        allDropdowns.forEach(d => d.classList.add('hidden'));
+    }
+});
+
+// Initialize company switcher on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard loaded - initializing company switcher...');
+    
+    // Initialize company switcher
+    if (typeof window.initializeCompanySwitcher === 'function') {
+        window.initializeCompanySwitcher();
+    }
+    
+    // Test company switcher functionality
+    console.log('Company switcher initialized');
+    console.log('Available companies:', Object.keys(window.quickCompanySwitch || {}));
+    
+    // Add visual indicator for active company
+    const activeCompany = localStorage.getItem('activeCompany') || 'tcc';
+    console.log('Active company:', activeCompany);
+    
+    // Show notification for current company
+    setTimeout(() => {
+        const companyNames = {
+            'tcc': 'Tanzania Cigarette Company (TCC)',
+            'tbl': 'Tanzania Breweries Limited (TBL)',
+            'nmb': 'NMB Bank Plc',
+            'crdb': 'CRDB Bank Plc',
+            'tigo': 'Tigo Tanzania',
+            'vodacom': 'Vodacom Tanzania',
+            'airtel': 'Airtel Tanzania',
+            'tanesco': 'TANESCO',
+            'twiga': 'Twiga Cement',
+            'azam': 'Azam Tanzania',
+            'yara': 'Yara Tanzania',
+            'hr-system': 'HR Management System'
+        };
+        
+        if (activeCompany && companyNames[activeCompany]) {
+            showNotification('info', 'Current Company', `Currently active: ${companyNames[activeCompany]}`);
+        }
+    }, 2000);
+});
+
+// Quick action shortcuts
+window.quickActionShortcuts = {
+    'Ctrl+N': () => window.navigateTo('add-employee'),
+    'Ctrl+P': () => window.navigateTo('payroll'),
+    'Ctrl+L': () => window.navigateTo('leave'),
+    'Ctrl+R': () => window.navigateTo('recruitment'),
+    'Ctrl+D': () => window.navigateTo('dashboard'),
+    'Ctrl+S': () => window.navigateTo('system-settings'),
+    'Ctrl+H': () => window.navigateTo('help-support')
+};
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    const key = e.ctrlKey ? `Ctrl+${e.key.toUpperCase()}` : null;
+    
+    if (key && window.quickActionShortcuts[key]) {
+        e.preventDefault();
+        window.quickActionShortcuts[key]();
+    }
+});
+
+// Enhanced sidebar toggle
+window.toggleSidebar = function(event) {
+    event.preventDefault();
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const topHeader = document.getElementById('top-header');
+    
+    if (sidebar.classList.contains('translate-x-0')) {
+        // Close sidebar
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('-translate-x-full');
+        mainContent.classList.remove('ml-64');
+        mainContent.classList.add('ml-0');
+        if (topHeader) {
+            topHeader.classList.remove('left-64');
+            topHeader.classList.add('left-0');
+        }
+    } else {
+        // Open sidebar
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+        mainContent.classList.remove('ml-0');
+        mainContent.classList.add('ml-64');
+        if (topHeader) {
+            topHeader.classList.remove('left-0');
+            topHeader.classList.add('left-64');
+        }
+    }
+};
+
+// Company switcher functionality
+window.switchCompany = function(companyId) {
+    showNotification('info', 'Switching Company', 'Switching to selected company...');
+    
+    // Simulate company switch (in real app, this would make an API call)
+    setTimeout(() => {
+        showNotification('success', 'Company Switched', `Successfully switched to company ${companyId}`);
+        
+        // Update UI elements
+        const currentCompanyElement = document.getElementById('current-company-name');
+        if (currentCompanyElement) {
+            const companyNames = {
+                'tcc': 'Tanzania Cigarette Company (TCC)',
+                'tbl': 'Tanzania Breweries Limited (TBL)',
+                'nmb': 'NMB Bank Plc',
+                'crdb': 'CRDB Bank Plc',
+                'tigo': 'Tigo Tanzania',
+                'vodacom': 'Vodacom Tanzania',
+                'airtel': 'Airtel Tanzania',
+                'tanesco': 'TANESCO',
+                'twiga': 'Twiga Cement',
+                'azam': 'Azam Tanzania',
+                'yara': 'Yara Tanzania',
+                'hr-system': 'HR Management System'
+            };
+            
+            currentCompanyElement.textContent = companyNames[companyId] || 'HR Management System';
+        }
+        
+        // Update page title
+        document.title = `${companyNames[companyId] || 'HR Management System'} - HR Management System`;
+        
+        // Store preference
+        localStorage.setItem('activeCompany', companyId);
+        localStorage.setItem('activeCompanyName', companyNames[companyId] || 'HR Management System');
+        
+        // Trigger company changed event
+        window.dispatchEvent(new CustomEvent('companyChanged', {
+            detail: { 
+                companyId: companyId, 
+                companyName: companyNames[companyId] || 'HR Management System',
+                timestamp: new Date().toISOString()
+            }
+        }));
+        
+        // Optional: Reload page after a short delay to refresh data
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    }, 1000);
+};
+
+// Enhanced company switcher with auto-detection
+window.initializeCompanySwitcher = function() {
+    const activeCompany = localStorage.getItem('activeCompany') || 'tcc';
+    const activeCompanyName = localStorage.getItem('activeCompanyName') || 'Tanzania Cigarette Company (TCC)';
+    
+    // Update current company display
+    const currentCompanyElement = document.getElementById('current-company-name');
+    if (currentCompanyElement) {
+        currentCompanyElement.textContent = activeCompanyName;
+    }
+    
+    // Update page title
+    document.title = `${activeCompanyName} - HR Management System`;
+    
+    // Update sidebar menu
+    if (typeof updateSidebarMenu === 'function') {
+        updateSidebarMenu(activeCompany, activeCompanyName);
+    }
+    
+    // Add company change listener
+    window.addEventListener('companyChanged', function(event) {
+        const { companyId, companyName } = event.detail;
+        console.log(`Company changed to: ${companyName} (${companyId})`);
+        
+        // Update any UI elements that depend on company
+        const companyIndicators = document.querySelectorAll('[data-company-indicator]');
+        companyIndicators.forEach(indicator => {
+            indicator.setAttribute('data-company-indicator', companyId);
+        });
+    });
+};
+
+// Quick company switching shortcuts
+window.quickCompanySwitch = {
+    'Ctrl+1': () => switchCompany('tcc'),
+    'Ctrl+2': () => switchCompany('tbl'),
+    'Ctrl+3': () => switchCompany('nmb'),
+    'Ctrl+4': () => switchCompany('crdb'),
+    'Ctrl+5': () => switchCompany('tigo'),
+    'Ctrl+6': () => switchCompany('vodacom'),
+    'Ctrl+7': () => switchCompany('airtel'),
+    'Ctrl+8': () => switchCompany('tanesco'),
+    'Ctrl+9': () => switchCompany('twiga'),
+    'Ctrl+0': () => switchCompany('azam'),
+    'Alt+1': () => switchCompany('yara'),
+    'Alt+2': () => switchCompany('hr-system')
+};
+
+// Enhanced keyboard shortcuts for company switching
+document.addEventListener('keydown', function(e) {
+    const key = e.ctrlKey ? `Ctrl+${e.key}` : e.altKey ? `Alt+${e.key}` : null;
+    
+    if (key && window.quickCompanySwitch[key]) {
+        e.preventDefault();
+        window.quickCompanySwitch[key]();
+    }
+});
+
+// Enhanced quick actions view toggle
+window.toggleQuickActionsView = function() {
+    const extendedActions = document.getElementById('extended-quick-actions');
+    const toggleText = document.getElementById('quick-actions-toggle-text');
+    const toggleIcon = document.querySelector('[onclick*="toggleQuickActionsView"] svg');
+    
+    if (extendedActions.classList.contains('hidden')) {
+        extendedActions.classList.remove('hidden');
+        toggleText.textContent = 'Show Less';
+        if (toggleIcon) {
+            toggleIcon.style.transform = 'rotate(180deg)';
+        }
+    } else {
+        extendedActions.classList.add('hidden');
+        toggleText.textContent = 'Show More';
+        if (toggleIcon) {
+            toggleIcon.style.transform = 'rotate(0deg)';
+        }
+    }
+};
+
+// Search functionality
+window.searchSystem = function(query) {
+    if (!query || query.length < 2) {
+        showNotification('warning', 'Search', 'Please enter at least 2 characters to search');
+        return;
+    }
+    
+    showNotification('info', 'Searching', `Searching for "${query}"...`);
+    
+    // Simulate search (in real app, this would make an API call)
+    setTimeout(() => {
+        showNotification('success', 'Search Complete', `Found 5 results for "${query}"`);
+    }, 1000);
+};
+
+// Notification preferences
+window.updateNotificationSettings = function(settings) {
+    localStorage.setItem('notificationSettings', JSON.stringify(settings));
+    showNotification('success', 'Settings Updated', 'Notification preferences have been saved');
+};
+
+// Theme toggle
+window.toggleTheme = function() {
+    const body = document.body;
+    const currentTheme = body.classList.contains('dark') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    body.classList.remove(currentTheme);
+    body.classList.add(newTheme);
+    
+    localStorage.setItem('theme', newTheme);
+    showNotification('success', 'Theme Changed', `Switched to ${newTheme} mode`);
+};
 // Employee Growth Chart
 const employeeGrowthCtx = document.getElementById('employeeGrowthChart').getContext('2d');
 const employeeGrowthChart = new Chart(employeeGrowthCtx, {
